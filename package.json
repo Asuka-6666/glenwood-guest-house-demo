@@ -1,0 +1,20 @@
+{
+  "name": "glenwood-guest-house-demo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "prepare:public": "node scripts/prepare-public.mjs",
+    "build": "npm run prepare:public && vite build",
+    "preview": "vite preview",
+    "serve:demo": "serve -s dist -l 8080"
+  },
+  "devDependencies": {
+    "serve": "^14.2.4",
+    "vite": "^7.0.0"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  }
+}
