@@ -352,3 +352,78 @@ html,body{max-width:100%;overflow-x:clip}img{max-width:100%}.booking-drawer *,.r
   .room-modal-images{height:100%}
   .room-modal-copy{max-height:none;overflow:visible}
 }
+
+/* Mobile header: hide Book, keep brand truly centered */
+@media(max-width:900px){
+  .site-header{
+    grid-template-columns:1fr auto 1fr!important;
+    align-items:center;
+  }
+  .menu-button{
+    grid-column:1!important;
+    justify-self:start!important;
+  }
+  .brand{
+    grid-column:2!important;
+    justify-self:center!important;
+    text-align:center;
+  }
+  .header-book{
+    display:none!important;
+  }
+}
+
+/* Booking drawer close button: keep visible above sticky header */
+.booking-drawer>.close-button{
+  position:absolute!important;
+  z-index:30!important;
+  top:.55rem!important;
+  right:.55rem!important;
+  width:44px!important;
+  height:44px!important;
+  display:grid!important;
+  place-items:center!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:50%!important;
+  background:rgba(255,255,255,.96)!important;
+  color:var(--forest)!important;
+  font-family:var(--serif)!important;
+  font-size:1.85rem!important;
+  line-height:1!important;
+  box-shadow:0 2px 10px rgba(8,23,18,.12);
+}
+.booking-header .booking-help-link{padding-right:3rem}
+
+/* Match date fields to Adults select: radius, padding, text alignment */
+.booking-drawer input,
+.booking-drawer select{
+  border-radius:8px;
+  background:#faf8f3;
+}
+.booking-drawer input[type=date]{
+  -webkit-appearance:none;
+  appearance:none;
+  display:flex;
+  align-items:center;
+  padding-inline:.85rem;
+  color:var(--ink);
+}
+.booking-drawer input[type=date]::-webkit-date-and-time-value{
+  text-align:left;
+  margin:0;
+}
+.booking-drawer input[type=date]::-webkit-datetime-edit{
+  display:flex;
+  align-items:center;
+  padding:0;
+  height:100%;
+}
+.booking-drawer input[type=date]::-webkit-calendar-picker-indicator{
+  margin-left:auto;
+  cursor:pointer;
+  opacity:.7;
+}
+
+.room-modal-images img{cursor:zoom-in}

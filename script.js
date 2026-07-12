@@ -203,7 +203,9 @@ const openRoomDetails = roomKey => {
 };
 document.querySelector('#roomImagePrev').addEventListener('click', () => showRoomImage(roomImageIndex - 1));
 document.querySelector('#roomImageNext').addEventListener('click', () => showRoomImage(roomImageIndex + 1));
-document.querySelectorAll('button[data-room]').forEach(button => button.addEventListener('click', () => openRoomDetails(button.dataset.room)));
+document.querySelectorAll('button.room-detail, button.booking-action-room-link').forEach(button => {
+  button.addEventListener('click', () => openRoomDetails(button.dataset.room));
+});
 roomOverlay.querySelectorAll('[data-room-close]').forEach(button => button.addEventListener('click', () => closeOverlay(roomOverlay)));
 document.querySelector('#roomModalBook').addEventListener('click', () => {
   closeOverlay(roomOverlay);
@@ -216,27 +218,60 @@ const lightbox = document.querySelector('#lightbox');
 const lightboxImage = lightbox.querySelector('img');
 const lightboxCaption = lightbox.querySelector('figcaption');
 const lightboxProgress = lightbox.querySelector('.lightbox-progress');
-let visibleGallery = galleryFigures;
+let lightboxItems = [];
 let lightboxIndex = 0;
 const showLightboxImage = index => {
-  visibleGallery = galleryFigures.filter(figure => !figure.hidden);
-  lightboxIndex = (index + visibleGallery.length) % visibleGallery.length;
-  const figure = visibleGallery[lightboxIndex];
-  const image = figure.querySelector('img');
-  lightboxImage.src = image.src;
-  lightboxImage.alt = image.alt;
-  lightboxCaption.textContent = figure.querySelector('figcaption').textContent;
-  lightboxProgress.textContent = `${lightboxIndex + 1} / ${visibleGallery.length}`;
+  if (!lightboxItems.length) return;
+  lightboxIndex = (index + lightboxItems.length) % lightboxItems.length;
+  const item = lightboxItems[lightboxIndex];
+  lightboxImage.src = item.src;
+  lightboxImage.alt = item.alt;
+  lightboxCaption.textContent = item.caption;
+  lightboxProgress.textContent = `${lightboxIndex + 1} / ${lightboxItems.length}`;
 };
-galleryFigures.forEach(figure => figure.addEventListener('click', () => {
-  visibleGallery = galleryFigures.filter(item => !item.hidden);
-  showLightboxImage(visibleGallery.indexOf(figure));
+const openLightbox = (items, startIndex = 0) => {
+  if (!items.length) return;
+  lightboxItems = items;
+  showLightboxImage(startIndex);
   lastFocusedElement = document.activeElement;
   lightbox.hidden = false;
   document.body.classList.add('no-scroll');
   lightbox.querySelector('.lightbox-close').focus();
+};
+const roomLightboxItems = roomKey => {
+  const room = config.rooms[roomKey];
+  if (!room) return [];
+  return room.images.map(([src, alt]) => ({ src, alt, caption: `${room.name} · ${alt}` }));
+};
+galleryFigures.forEach(figure => figure.addEventListener('click', () => {
+  const visible = galleryFigures.filter(item => !item.hidden);
+  openLightbox(visible.map(item => {
+    const image = item.querySelector('img');
+    return { src: image.src, alt: image.alt, caption: item.querySelector('figcaption').textContent };
+  }), visible.indexOf(figure));
 }));
-lightbox.querySelector('.lightbox-close').addEventListener('click', () => { lightbox.hidden = true; document.body.classList.remove('no-scroll'); lastFocusedElement?.focus(); });
+document.querySelectorAll('.booking-view-room').forEach(button => {
+  button.addEventListener('click', () => openLightbox(roomLightboxItems(button.dataset.room), 0));
+});
+document.querySelectorAll('.booking-room-gallery > img').forEach(image => {
+  image.style.cursor = 'zoom-in';
+  image.addEventListener('click', () => {
+    const roomKey = image.closest('[data-result-room]')?.dataset.resultRoom;
+    if (roomKey) openLightbox(roomLightboxItems(roomKey), 0);
+  });
+});
+roomModalImages.addEventListener('click', event => {
+  if (event.target.tagName !== 'IMG' || !activeRoomKey) return;
+  openLightbox(roomLightboxItems(activeRoomKey), roomImageIndex);
+});
+const closeLightbox = () => {
+  lightbox.hidden = true;
+  if (bookingOverlay.hidden && roomOverlay.hidden && galleryOverlay.hidden && !siteNav.classList.contains('open')) {
+    document.body.classList.remove('no-scroll');
+  }
+  lastFocusedElement?.focus();
+};
+lightbox.querySelector('.lightbox-close').addEventListener('click', closeLightbox);
 lightbox.querySelector('.lightbox-prev').addEventListener('click', () => showLightboxImage(lightboxIndex - 1));
 lightbox.querySelector('.lightbox-next').addEventListener('click', () => showLightboxImage(lightboxIndex + 1));
 let lightboxTouchStartX = 0;
@@ -285,7 +320,7 @@ document.addEventListener('keydown', event => {
   if (!lightbox.hidden && event.key === 'ArrowLeft') showLightboxImage(lightboxIndex - 1);
   if (!lightbox.hidden && event.key === 'ArrowRight') showLightboxImage(lightboxIndex + 1);
   if (event.key === 'Escape') {
-    if (!lightbox.hidden) { lightbox.hidden = true; document.body.classList.remove('no-scroll'); lastFocusedElement?.focus(); }
+    if (!lightbox.hidden) closeLightbox();
     else if (!roomOverlay.hidden) closeOverlay(roomOverlay);
     else if (!bookingOverlay.hidden) closeOverlay(bookingOverlay);
     else if (!galleryOverlay.hidden) closeOverlay(galleryOverlay);
