@@ -12,7 +12,8 @@
   },
   "devDependencies": {
     "serve": "^14.2.4",
-    "vite": "^7.0.0"
+    "vite": "^7.0.0",
+    "wrangler": "^4.110.0"
   },
   "engines": {
     "node": ">=20.19.0"
